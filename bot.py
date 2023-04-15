@@ -19,7 +19,7 @@ min = 20
 oldmin = min
 def get_skins():
     driver.get(URL)
-    time.sleep(5)
+    time.sleep(4)
     page = driver.page_source
     soup = BeautifulSoup(page, "html.parser")
     skinsfound = []
@@ -46,7 +46,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 bot = commands.Bot(command_prefix='//',intents=discord.Intents.all())
 
 skindict = {}
-@tasks.loop(seconds=7)
+@tasks.loop(seconds=6)
 async def task_loop():
     global oldmin
     if oldmin != min:
@@ -74,6 +74,11 @@ async def task_loop():
 async def start(ctx):
     await ctx.send("Beginning searching at " + str(min) + "%   (Use **//Min [percentage]** to change minimum percentage)")
     task_loop.start()
+
+@bot.command(name="Stop")
+async def start(ctx):
+    await ctx.send("Terminating search")
+    task_loop.stop()
 
 @bot.command(name="Min")
 async def test(ctx, newmin):
