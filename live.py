@@ -12,56 +12,63 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 # from discord.ext import commands, tasks
 import time
 
+CART = "https://skinport.com/cart"
 URL = "https://skinport.com/market?sort=date&order=desc"
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+options = Options()
+options.add_argument("user-data-dir=C:\\Users\\Alex Warda\\AppData\\Local\\Google\\Chrome\\User Data")
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 driver.get(URL)
+driver.refresh()
 driver.set_window_size(1400,1000)
 time.sleep(3)
-page = driver.page_source
 live = driver.find_element(By.CLASS_NAME, "LiveBtn")
 live.click()
 time.sleep(1)
 driver.set_window_size(800,1000)
 time.sleep(1)
 
+skindict = {}
 def get_skins():
-    items = driver.find_element(By.CLASS_NAME, "ItemPreview-content")
-    for item in items:
+    items = driver.find_elements(By.CLASS_NAME, "ItemPreview-content")
+    for i in range(0, 5):
         # parent = item.find_element(By.CLASS_NAME, "ItemPreview-priceValue")
         # price = parent.find_element(By.CLASS_NAME, "Tooltip-link")
-        disc = item.find_element(By.XPATH, "//div[@class='GradientLabel ItemPreview-discount']/span");
+        disc = items[i].find_element(By.CLASS_NAME, "ItemPreview-priceValue");
         # disc = disc_div.find_element(By.TAG_NAME, "span")
-        title = item.find_element(By.CLASS_NAME, "ItemPreview-itemTitle")
-        name = item.find_element(By.CLASS_NAME, "ItemPreview-itemName")
-        print(title.text + " " + name.text)
-        print(disc.text + "\n")
-        # if(discount):
-        #     num = discount.find("span").text
-        #     num = int(re.findall(r'\d+', discount.find("span").text)[0])
-        #     if(num >= 5):
-        #         print("Found cheap item\n")
-        #         info = card.find("div", class_="ItemPreview-itemInfo")
-        #         price = info.find("div", class_="Tooltip-link").text
-        #         link = item.find("a", class_="ItemPreview-link", href=True)
-        #         name = item.find("div", class_="ItemPreview-itemTitle").text + " " + item.find("div", class_="ItemPreview-itemName").text
-        #         find = price + " ---> %" + str(num) + " discount (" + name + ")\nhttps://skinport.com" + link['href']
-        #         btn_div = card.find("div", class_="ItemPreview-actionBtn")
-        #         btn = btn_div.find("button", class_="ItemPreview-mainAction")
-        #         print(btn)
-        #         cart = driver.find_element(By.XPATH, xpath)
-        #         cart.click()
-        #         return find
+        title = items[i].find_element(By.CLASS_NAME, "ItemPreview-itemTitle")
+        name = items[i].find_element(By.CLASS_NAME, "ItemPreview-itemName")
+        if(disc):
+            if "%" in disc.text:
+                price = disc.text[disc.text.index("$") + 1:disc.text.index("\n")]
+                discount = disc.text[disc.text.index("−") + 2:disc.text.index("%")]
+                if (int(discount) >= 15) and (float(price) >= 3):
+                    ind = hash(disc)
+                    if ind not in skindict:
+                        cart_btn = items[i].find_element(By.CLASS_NAME, "ItemPreview-mainAction")
+                        cart_btn.click()
+                        print(title.text + " " + name.text)
+                        print("Price: $" + price + "\nDiscount: " + discount + "%\n")
+                        skindict[ind] = disc
+                        return True
+        return False
 
-get_skins()
-
-# while(True):
-#     skin = get_skins()
-#     if(skin):
-#         print(skin)
-#         break
+while(True):
+    skin = get_skins()
+    if(skin):
+        driver.get(CART)
+        time.sleep(1)
+        div = driver.find_element(By.CLASS_NAME, "CartSummary-payment")
+        check1 = driver.find_element(By.ID, "cb-tradelock-5")
+        check1.click()
+        check2 = driver.find_element(By.ID, "cb-cancellation-6")
+        check2.click()
+        submit = driver.find_element(By.XPATH, "//button[@class='SubmitButton CartSummary-checkoutBtn SubmitButton--isFull']")
+        submit.click()
+        time.sleep(2)
 
 # load_dotenv()
 
