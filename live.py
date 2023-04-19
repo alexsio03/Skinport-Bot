@@ -22,13 +22,13 @@ options = Options()
 options.add_argument("user-data-dir=C:\\Users\\Alex Warda\\AppData\\Local\\Google\\Chrome\\User Data")
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 driver.get(URL)
+time.sleep(1)
 driver.refresh()
 driver.set_window_size(1400,1000)
-time.sleep(3)
+time.sleep(2)
 live = driver.find_element(By.CLASS_NAME, "LiveBtn")
 live.click()
-time.sleep(1)
-driver.set_window_size(800,1000)
+driver.set_window_size(1000,1000)
 time.sleep(1)
 
 skindict = {}
@@ -38,86 +38,57 @@ def get_skins():
         # parent = item.find_element(By.CLASS_NAME, "ItemPreview-priceValue")
         # price = parent.find_element(By.CLASS_NAME, "Tooltip-link")
         disc = items[i].find_element(By.CLASS_NAME, "ItemPreview-priceValue");
-        # disc = disc_div.find_element(By.TAG_NAME, "span")
-        title = items[i].find_element(By.CLASS_NAME, "ItemPreview-itemTitle")
-        name = items[i].find_element(By.CLASS_NAME, "ItemPreview-itemName")
+        #title = items[i].find_element(By.CLASS_NAME, "ItemPreview-itemTitle")
+        #name = items[i].find_element(By.CLASS_NAME, "ItemPreview-itemName")
         if(disc):
             if "%" in disc.text:
                 price = disc.text[disc.text.index("$") + 1:disc.text.index("\n")]
                 discount = disc.text[disc.text.index("−") + 2:disc.text.index("%")]
-                if (int(discount) >= 15) and (float(price) >= 3):
+                if (int(discount) >= 15) and (float(price) >= 2.5):
                     ind = hash(disc)
                     if ind not in skindict:
-                        cart_btn = items[i].find_element(By.CLASS_NAME, "ItemPreview-mainAction")
-                        cart_btn.click()
-                        print(title.text + " " + name.text)
-                        print("Price: $" + price + "\nDiscount: " + discount + "%\n")
+                        items[i].find_element(By.CLASS_NAME, "ItemPreview-mainAction").click()
+                        #print(title.text + " " + name.text)
+                        #print("Price: $" + price + "\nDiscount: " + discount + "%\n")
                         skindict[ind] = disc
                         return True
-        return False
 
-while(True):
-    skin = get_skins()
-    if(skin):
-        driver.get(CART)
-        time.sleep(1)
-        div = driver.find_element(By.CLASS_NAME, "CartSummary-payment")
-        check1 = driver.find_element(By.ID, "cb-tradelock-5")
-        check1.click()
-        check2 = driver.find_element(By.ID, "cb-cancellation-6")
-        check2.click()
-        submit = driver.find_element(By.XPATH, "//button[@class='SubmitButton CartSummary-checkoutBtn SubmitButton--isFull']")
-        submit.click()
-        time.sleep(2)
+driver.get(CART)
+time.sleep(1)
+driver.find_element(By.NAME, "tradelock").click()
+driver.find_element(By.NAME, "cancellation").click()
+driver.find_element(By.XPATH, "//button[@class='SubmitButton CartSummary-checkoutBtn SubmitButton--isFull']").click()
+time.sleep(3)
 
-# load_dotenv()
+driver.switch_to.frame(driver.find_element(By.XPATH, "//iframe[@title='Iframe for secured card number']"));
+driver.find_element(By.XPATH, "/html/body/div/input").send_keys("4899010006746775")
+driver.switch_to.default_content()
+time.sleep(.5)
 
-# TOKEN = os.getenv('DISCORD_TOKEN')
+driver.switch_to.frame(driver.find_element(By.XPATH, "//iframe[@title='Iframe for secured card expiry date']"));
+driver.find_element(By.XPATH, "/html/body/div/input").send_keys("0325")
+driver.switch_to.default_content()
+time.sleep(.5)
 
-# bot = commands.Bot(command_prefix='//',intents=discord.Intents.all())
+driver.switch_to.frame(driver.find_element(By.XPATH, "//iframe[@title='Iframe for secured card security code']"));
+driver.find_element(By.XPATH, "/html/body/div/input").send_keys("318")
+driver.switch_to.default_content()
+time.sleep(.5)
 
-# skindict = {}
-# @tasks.loop(seconds=7)
-# async def task_loop():
-#     global oldmin
-#     if oldmin != min:
-#         await bot.get_channel(1095751866765283418).send("Minimum set to: " + str(min) + "%\nSearching...")
-#         oldmin = min
-#     skins = get_skins()
-#     for i in skins:
-#         ind = hash(i)
-#         if ind not in skindict:
-#             await bot.get_channel(1095751866765283418).send("New Item Found!")
-#             await bot.get_channel(1095751866765283418).send(i)
-#             skindict[ind] = i
-#             #<@&915082507685343274>
+driver.find_element(By.XPATH, "//button[@class='adyen-checkout__button adyen-checkout__button--pay']").click()
+time.sleep(5)
 
-    
-# # @bot.command(name='Search')
-# # async def search(ctx):
-# #     await ctx.send("Searching...")
-# #     skins = get_skins(20)
-# #     joined = '\n\n'.join([str(elem) for elem in skins])
-
-# #     await ctx.send(joined)
-
-# @bot.command(name="Start")
-# async def start(ctx):
-#     await ctx.send("Beginning searching at " + str(min) + "%   (Use **//Min [percentage]** to change minimum percentage)")
-#     task_loop.start()
-
-# @bot.command(name="Stop")
-# async def start(ctx):
-#     await ctx.send("Terminating search")
-#     task_loop.stop()
-
-# @bot.command(name="Min")
-# async def test(ctx, newmin):
-#     global min
-#     min = int(newmin)
-#     # skins = get_skins(int(min))
-#     # joined = '\n\n'.join([str(elem) for elem in skins])
-
-#     # await ctx.send(joined)
-
-# bot.run(TOKEN)
+# while(True):
+#     skin = get_skins()
+#     if(skin):
+#         driver.get(CART)
+#         time.sleep(1)
+#         driver.find_element(By.NAME, "tradelock").click()
+#         driver.find_element(By.NAME, "cancellation").click()
+#         driver.find_element(By.XPATH, "//button[@class='SubmitButton CartSummary-checkoutBtn SubmitButton--isFull']").click()
+#         time.sleep(1)
+#         driver.find_element(By.XPATH, "//input[@autocomplete='cc-number']").send_keys("4899012293857143")
+#         driver.find_element(By.XPATH, "//input[@autocomplete='cc-exp']").send_keys("0925")
+#         driver.find_element(By.XPATH, "//input[@autocomplete='cc-csc']").send_keys("318")
+#         driver.find_element(By.XPATH, "//button[@class='adyen-checkout__button adyen-checkout__button--pay']").click()
+        
