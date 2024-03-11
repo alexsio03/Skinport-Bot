@@ -12,7 +12,7 @@ This project uses the following libraries and tools:
 ## Setup
 
 1. If you would like to run this code, you must get a Discord Bot API key and add it to your .env file.
-   This takes could take some work. More details can be found here: https://discord.com/developers/applications
+   This could take some work. More details can be found here: https://discord.com/developers/applications
    Clone the repo to begin
 ```bash
 git clone https://github.com/alexsio03/Skinport-Bot
