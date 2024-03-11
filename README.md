@@ -1,5 +1,7 @@
 # Skinport Bot
-A small copy of the retro game "Space Invaders" programmed using Python and the pygame library
+A web scraper to find items that have either a low price or a large discount on the popular online marketplace skinport.com.
+This scraper would both try to reserve the item for you so you could purchase it and gain a profit, as well as send a notification
+to your server on Discord using the Discord Bot API about the item.
 
 ## Tools Used
 This project uses the following libraries and tools:
